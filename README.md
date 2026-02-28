@@ -41,6 +41,7 @@ Response:
 }
 
 ### 🗂 Project Structure
+```
 src/
 │
 ├── app.ts                # Express app configuration
@@ -54,6 +55,7 @@ src/
 │
 └── test/
     └── locations.test.ts # Automated test suite
+text'''
 
 ### ⚙ Setup Instructions
 1. Install Dependencies
@@ -129,8 +131,8 @@ Input	Behavior
 No scale parameter	Defaults to Fahrenheit
 ?scale=	            Defaults to Fahrenheit
 ?scale=Celsius	    Returns Celsius
-?scale=Fahrenheit	Returns Fahrenheit
-Unsupported scale	Returns 400
+?scale=Fahrenheit	  Returns Fahrenheit
+Unsupported scale	  Returns 400
 
 Scale matching is case-insensitive but normalized in the response.
 
