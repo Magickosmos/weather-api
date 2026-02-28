@@ -1,13 +1,13 @@
 // -------------------------------------------------------------------------
 /**
  * Locations Route
- * 
+ *
  * Handles GET /locations/:zip requests.
  * Validates input, processes optional scale query parameter,
  * and returns the current temperature for the specified ZIP code.
  *
  * @author Alexander Smith (smithaj201)
- * @version 1
+ * @version 2
  */
 // -------------------------------------------------------------------------
 
@@ -17,34 +17,62 @@ import { getTemperature } from '../services/weatherService';
 const router = Router();
 
 router.get('/:zip', async (req: Request, res: Response) => {
-    let zipParam = req.params.zip;
-    if (Array.isArray(zipParam)) zipParam = zipParam[0];
+
+    /* =============================
+       ZIP VALIDATION
+    ============================== */
+
+    const zipParam = Array.isArray(req.params.zip)
+        ? req.params.zip[0]
+        : req.params.zip;
+
     const zip = String(zipParam);
 
     if (!/^\d{5}$/.test(zip)) {
         return res.status(400).json({ error: 'Invalid ZIP code' });
     }
 
-    const rawScale = req.query.scale;
-    let scale: string;
+    /* =============================
+       SCALE VALIDATION
+    ============================== */
 
-    if (Array.isArray(rawScale)) {
-        scale = String(rawScale[0]);
-    } else if (typeof rawScale === 'string') {
-        scale = rawScale;
+    const rawScale = Array.isArray(req.query.scale)
+        ? req.query.scale[0]
+        : req.query.scale;
+
+    let scale: 'Fahrenheit' | 'Celsius';
+
+    // Default when missing or empty
+    if (!rawScale || String(rawScale).trim() === '') {
+        scale = 'Fahrenheit';
     } else {
-        scale = 'Fahrenheit'; // default
+        const normalized = String(rawScale).trim().toLowerCase();
+
+        if (normalized === 'celsius') {
+            scale = 'Celsius';
+        } else if (normalized === 'fahrenheit') {
+            scale = 'Fahrenheit';
+        } else {
+            return res.status(400).json({ error: 'Invalid scale' });
+        }
     }
 
-    scale = scale.toLowerCase() === 'celsius' ? 'Celsius' : 'Fahrenheit';
+    /* =============================
+       FETCH TEMPERATURE
+    ============================== */
 
     try {
         const temperature = await getTemperature(zip, scale);
+
         if (temperature === null) {
             return res.status(404).json({ error: 'Location not found' });
         }
 
-        return res.status(200).json({ temperature, scale });
+        return res.status(200).json({
+            temperature,
+            scale
+        });
+
     } catch (err) {
         console.error('Error fetching temperature:', err);
         return res.status(500).json({ error: 'Failed to fetch temperature' });
