@@ -55,7 +55,7 @@ src/
 │
 └── test/
     └── locations.test.ts # Automated test suite
-text'''
+```
 
 ### ⚙ Setup Instructions
 1. Install Dependencies
